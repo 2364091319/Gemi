@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>Gemini代理客户端</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>智能问答系统</h1>
+        <div class="input-group">
+            <textarea id="question" placeholder="请输入您的问题..."></textarea>
+            <button onclick="submitQuestion()">发送</button>
+        </div>
+        <div id="response" class="response-box"></div>
+    </div>
+
+    <script>
+        async function submitQuestion() {
+            const question = document.getElementById('question').value;
+            const responseBox = document.getElementById('response');
+            
+            responseBox.innerHTML = '思考中...';
+            
+            try {
+                const response = await fetch('/gemini', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{ text: question }]
+                        }]
+                    })
+                });
+
+                const data = await response.json();
+                responseBox.innerHTML = data.candidates?.[0]?.content?.parts?.[0]?.text || '未收到有效响应';
+                
+            } catch (error) {
+                responseBox.innerHTML = `错误：${error.message}`;
+                responseBox.classList.add('error');
+            }
+        }
+    </script>
+</body>
+</html>
